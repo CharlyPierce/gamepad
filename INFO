@@ -1,0 +1,44 @@
+#ingresa usuario a manejo de eventos de teclado 
+
+sudo usermod -aG input user  #change user to your username
+#reboot
+sudo deluser user input  #change user to your username
+#reboot
+
+
+
+
+Tecla del Teclado  ->  Botón del Controlador de Xbox
+---------------------------------------------------
+W                  ->  Joystick Izquierdo Arriba (ABS_Y)
+S                  ->  Joystick Izquierdo Abajo (ABS_Y)
+A                  ->  Joystick Izquierdo Izquierda (ABS_X)
+D                  ->  Joystick Izquierdo Derecha (ABS_X)
+UP                 ->  Joystick Derecho Arriba (ABS_RY)
+DOWN               ->  Joystick Derecho Abajo (ABS_RY)
+LEFT               ->  Joystick Derecho Izquierda (ABS_RX)
+RIGHT              ->  Joystick Derecho Derecha (ABS_RX)
+I                  ->  Botón Y (BTN_Y)
+K                  ->  Botón A (BTN_A)
+J                  ->  Botón X (BTN_X)
+L                  ->  Botón B (BTN_B)
+2                  ->  Botón Select (BTN_SELECT)
+3                  ->  Botón Start (BTN_START)
+4                  ->  Botón Mode (BTN_MODE)
+8                  ->  DPAD Arriba (BTN_DPAD_UP)
+KP2                ->  DPAD Abajo (BTN_DPAD_DOWN, teclado numérico 2)
+KP6                ->  DPAD Derecha (BTN_DPAD_RIGHT, teclado numérico 6)
+KP4                ->  DPAD Izquierda (BTN_DPAD_LEFT, teclado numérico 4)
+T                  ->  Botón Trigger Happy 2 (BTN_TRIGGER_HAPPY2)
+G                  ->  Botón Trigger Happy 3 (BTN_TRIGGER_HAPPY3)
+F                  ->  Botón Trigger Happy 4 (BTN_TRIGGER_HAPPY4)
+H                  ->  Botón Trigger Happy 5 (BTN_TRIGGER_HAPPY5)
+Q                  ->  Gatillo Izquierdo (LT, BTN_TL)
+Z                  ->  Botón Superior Izquierdo (LB, BTN_TL2)
+E                  ->  Gatillo Derecho (RT, BTN_TR)
+R                  ->  Botón Superior Derecho (RB, BTN_TR2)
+P                  ->  Botón del Stick Analógico Izquierdo (ThumbL, BTN_THUMBL)
+M                  ->  Botón del Stick Analógico Derecho (ThumbR, BTN_THUMBR)
+7                  ->  Botón Trigger Happy 1 (BTN_TRIGGER_HAPPY1)
+9                  ->  Botón Trigger Happy 6 (BTN_TRIGGER_HAPPY6)
+
