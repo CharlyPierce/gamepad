@@ -119,4 +119,21 @@ python3 gamepad.py   # Si se tiene touchpad
 python3 gamepad_without_tp.py # Si no se tiene touchpad
 ```
 
+### Configuración de los scripts de Python
+
+En los archivos `gamepad.py` y `gamepad_without_tp.py`, debes cambiar la ruta a tu teclado y al touchpad:
+
+```python
+keyboard_dev = InputDevice('/dev/input/event0')  # <- Cambiar a tu teclado
+touchpad_dev = InputDevice('/dev/input/event4')  # <- Cambiar a tu touchpad
+```
+
+### Localización de dispositivos
+
+Puedes usar \`sudo evtest\` para localizar el dispositivo de tu teclado y tu touchpad.
+
+```bash
+sudo evtest
+```
+
 ¡Listo! Ahora deberías poder emular correctamente el control de Xbox.
