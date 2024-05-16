@@ -1,6 +1,17 @@
 import sys
 import select
 from evdev import InputDevice, UInput, ecodes as e, AbsInfo
+from touchpad_mapper import TouchpadMapper
+
+# Supongamos que los valores mínimos y máximos son conocidos:
+touchpad_x_min = 0
+touchpad_x_max = 2033
+touchpad_y_min = 0
+touchpad_y_max = 1332
+threshold = 250  # Umbral de movimiento
+
+# Instanciamos la clase TouchpadMapper con los valores mínimos y máximos y el umbral
+touchpad_mapper = TouchpadMapper(touchpad_x_min, touchpad_x_max, touchpad_y_min, touchpad_y_max, threshold)
 
 # Define el mapeo de teclas del teclado a botones del controlador de Xbox y ejes
 key_mapping = {
@@ -56,28 +67,9 @@ ui = UInput(cap, name='Virtual Xbox Controller', vendor=0x045e, product=0x028e, 
 keyboard_dev = InputDevice('/dev/input/event0')  # <- Cambiar a tu teclado
 touchpad_dev = InputDevice('/dev/input/event4')  # <- Cambiar a tu touchpad
 
-# Variables para rastrear el estado del touchpad
-touchpad_active = False
-initial_x = 0
-initial_y = 0
-current_x = 0
-current_y = 0
-
 # Variables para rastrear el estado de los ejes del joystick derecho
 ry_value = 0
 rz_value = 0
-
-# Funciones para mapear valores del touchpad a rangos de joystick linealmente
-def map_touchpad_to_joystick_x(delta, touchpad_min, touchpad_max):
-    joystick_min = -32767
-    joystick_max = 32767
-    return int(delta * (joystick_max - joystick_min) / (touchpad_max - touchpad_min))
-
-def map_touchpad_to_joystick_y(value, min_value, max_value):
-    joystick_min = -32767
-    joystick_max = 32767
-    return int((value - min_value) * (joystick_max - joystick_min) / (max_value - min_value) + joystick_min)
-
 
 # Bucle infinito para leer eventos del teclado y del touchpad
 try:
@@ -97,45 +89,32 @@ try:
                         if isinstance(mapping, tuple):
                             axis, value = mapping
                             ui.write(e.EV_ABS, axis, value if event.value else 0)
-                            # if axis == e.ABS_RY:
-                            #     print(f"Tecla {event.code} mapeada a e.ABS_RY con valor {value}")
-                            # elif axis == e.ABS_RZ:
-                            #     print(f"Tecla {event.code} mapeada a e.ABS_RZ con valor {value}")
                         else:
                             ui.write(e.EV_KEY, mapping, event.value)
                         # Sincroniza los eventos
                         ui.syn()
+        
                 elif dev == touchpad_dev and event.type == e.EV_ABS:
-                    if event.code == e.ABS_X:
-                        if not touchpad_active:
-                            initial_x = event.value
-                            touchpad_active = True
-                        current_x = event.value
-                    elif event.code == e.ABS_Y:
-                        if not touchpad_active:
-                            initial_y = event.value
-                            touchpad_active = True
-                        current_y = event.value
+                    touchpad_mapper.update(event.code, event.value)
+                    ry_value, rz_value = touchpad_mapper.get_joystick_values()
 
-                    if touchpad_active:
-                        delta_x = current_x - initial_x
-                        delta_y = current_y - initial_y
-                        ry_value = map_touchpad_to_joystick_x(delta_x, 0, 2033)
-                        rz_value = map_touchpad_to_joystick_y(delta_y, 0, 1332)
-                        # print(f"Touchpad ABS_X mapeado a RY: {ry_value}, ABS_Y mapeado a RZ: {rz_value}")
-                        ui.write(e.EV_ABS, e.ABS_RY, ry_value)
-                        ui.write(e.EV_ABS, e.ABS_RZ, rz_value)
-                        ui.syn()
-                elif dev == touchpad_dev and event.type == e.EV_SYN:
-                    if touchpad_active and (event.code == e.SYN_REPORT or event.code == e.SYN_MT_REPORT):
-                        # Detecta si el touchpad está inactivo (dedo levantado)
-                        if current_x == initial_x and current_y == initial_y:
-                            touchpad_active = False
-                            ry_value = 0
-                            rz_value = 0
-                            ui.write(e.EV_ABS, e.ABS_RY, ry_value)
-                            ui.write(e.EV_ABS, e.ABS_RZ, rz_value)
-                            ui.syn()
+                    # print(f"x: {touchpad_mapper.current_x}, center_x: {touchpad_mapper.x_center} {ry_value, rz_value}")
+                    # print(f"y: {touchpad_mapper.current_y}, center_y: {touchpad_mapper.y_center}")
+
+                    # Enviar los valores al joystick
+                    ui.write(e.EV_ABS, e.ABS_RY, ry_value)
+                    ui.write(e.EV_ABS, e.ABS_RZ, rz_value)
+                    ui.syn()
+
+                elif dev == touchpad_dev and event.type == e.EV_KEY and event.code == e.BTN_TOUCH and event.value == 0:
+                    # Detecta si el touchpad está inactivo (dedo levantado)
+                    touchpad_mapper.reset()
+                    ry_value = 0
+                    rz_value = 0
+                    # print(f"{ry_value, rz_value}")
+                    ui.write(e.EV_ABS, e.ABS_RY, ry_value)
+                    ui.write(e.EV_ABS, e.ABS_RZ, rz_value)
+                    ui.syn()
 
 except KeyboardInterrupt:
     pass  # Maneja la interrupción manual (Ctrl+C)
